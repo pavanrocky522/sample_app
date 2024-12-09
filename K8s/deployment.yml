@@ -22,3 +22,5 @@ spec:
         env:  # Optional: Add environment variables if needed
         - name: ASPNETCORE_ENVIRONMENT
           value: "Production"
+      imagePullSecrets:
+      - name: acr-secret
