@@ -1,29 +1,22 @@
-# Use the official .NET SDK image to build the application
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-
-# Set the working directory inside the container
+# Use the official .NET 8 SDK image to build the application
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
-
-# Copy the project files into the container
-COPY . ./
-
-# Restore project dependencies
-RUN dotnet restore
-
-# Build the application in Release mode
-RUN dotnet publish -c Release -o /app/out
-
-# Use a smaller runtime image for the final stage
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
-
-# Set the working directory inside the runtime image
-WORKDIR /app
-
-# Copy the built application from the build stage
-COPY --from=build /app/out ./
-
-# Expose port 80
 EXPOSE 80
 
-# Set the entry point to run the application
+# Use the .NET 8 SDK image to build the application
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+COPY ["sampleapp/sampleapp.csproj", "sampleapp/"]
+RUN dotnet restore "sampleapp/sampleapp.csproj"
+COPY . .
+WORKDIR "/src/sampleapp"
+RUN dotnet build "sampleapp.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "sampleapp.csproj" -c Release -o /app/publish
+
+# Copy the build output to the base image and set the entry point
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "sampleapp.dll"]
