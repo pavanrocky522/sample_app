@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sampleapp-deployment
+  labels:
+    app: sampleapp
+spec:
+  replicas: 2  # Number of pods
+  selector:
+    matchLabels:
+      app: sampleapp
+  template:
+    metadata:
+      labels:
+        app: sampleapp
+    spec:
+      containers:
+      - name: sampleapp-container
+        image: sampleappreg.azurecr.io/sampleapp:21  # Replace with your image
+        ports:
+        - containerPort: 80  # The port your app listens on
+        env:  # Optional: Add environment variables if needed
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Production"
